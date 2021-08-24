@@ -1,9 +1,16 @@
 import statsmodels.api as sm
+import streamlit as st
 import pandas as pd
 import numpy as np
+import os
+
+os.chdir(r'C:\Users\Samuel\Google Drive\Portfolio\Jobs\DriveTime')
+
+st.set_page_config(layout='wide')
+st.title('DriveTime')
+st.header('Worst Delinquency')
 
 panda = pd.read_csv('account-defaults.csv', encoding='utf-8')
-
 panda.loc[panda['TotalInquiries'].isnull(), 'TotalInquiries'] = np.mean(panda['TotalInquiries'])
 
 good_dq = panda.loc[panda['WorstDelinquency'] < 400]
@@ -51,5 +58,6 @@ append = pd.DataFrame({'WorstDelinquency': 'missing', 'TotalInquiries_coef': [cl
             'observations': len(dq_set)})
     
 out = out.append(append, ignore_index=True, sort=False)
-
 out['WorstDelinquency'] = out['WorstDelinquency'].astype(str)
+
+st.dataframe(out)
