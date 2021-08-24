@@ -5,6 +5,7 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.metrics import roc_auc_score
 from imblearn.over_sampling import SMOTE
 from collections import OrderedDict
+from urllib.request import urlopen
 from xgboost import XGBClassifier
 from scipy.stats import rankdata
 from torch import nn
@@ -174,15 +175,15 @@ def pipe(data, output='prob'):
     x = panda[IV].drop('HasInquiryTelecomm', axis=1)
     x['missing'] = x.isnull().sum(axis=1)
     
-    imputer = pickle.load(open('Pickles\\imputer.pkl', 'rb'))
+    imputer = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1L4gfNu_nTiXYMUHBn-7bGu_VBCgUF63t'))
     x = pd.DataFrame(imputer.transform(x), columns=x.columns)
     
-    scaler = pickle.load(open('Pickles\\scaler.pkl', 'rb'))
+    scaler = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1q29dWx-YLNQwmv2jFO1Db5amEgthtvQK'))
     x = pd.DataFrame(scaler.transform(x), columns=x.columns)
     
     x['HasInquiryTelecomm'] = np.where(panda['HasInquiryTelecomm'].isnull(), 0, panda['HasInquiryTelecomm'])
     
-    km = pickle.load(open('Pickles\\KMeans.pkl', 'rb'))
+    km = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1VPrzk_u9_vzTqDUMHLgqdoN__GhT1QFH'))
     km = np.argmax(km.transform(x), axis=1)
     km = pd.get_dummies(km, prefix='km')
     
@@ -197,7 +198,7 @@ def pipe(data, output='prob'):
     if output=='x':
         return x
     
-    discriminator = pickle.load(open('Pickles\\discriminator.pkl', 'rb'))
+    discriminator = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1O2Rlm7cSu4LZXtqe5Pj-OIX8j8qbvF-t'))
     
     if output=='prob':
         return discriminator.predict_proba(x)[:, 1]
