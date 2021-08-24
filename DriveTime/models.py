@@ -35,7 +35,7 @@ x['missing'] = x.isnull().sum(axis=1)
 
 # Impute missing values, using simple imputer to save time
 impute = SimpleImputer(strategy='mean').fit(x)
-pickle.dump(impute, open('Picklkes\\imputer.pkl', 'wb'))
+pickle.dump(impute, open('Pickles\\imputer.pkl', 'wb'))
 x = pd.DataFrame(impute.transform(x), columns=x.columns)
 
 # Try out different imputation methods to see if we can improve performance
@@ -129,8 +129,6 @@ helper.cv('logit', x[selected], y)
 print(f"All Columns: {helper.cv('logit', x, y, cv=100)}")
 print(f"Selected Columns: {helper.cv('logit', x[selected], y, cv=100)}")
 
-# Check if SMOTE helps, but at 30% it shouldn't do much. 
-
 
 # Random Forest - AUC: 0.55 | {'n_samples': 879}
 space = [skopt.space.Integer(50, 1000, name='n_samples')]
@@ -221,7 +219,7 @@ pickle.dump(discriminator, open('Pickles\\discriminator.pkl', 'wb'))
 
 discriminator.predict_proba(x)[:, 1]
 
-discriminator = sm.Logit(y, x).fit()
+discriminator = sm.Logit(y, x).fit(max_iter=500)
 pickle.dump(discriminator, open('Pickles\\discriminator_sm.pkl', 'wb'))
 
 print('')
