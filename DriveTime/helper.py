@@ -15,6 +15,7 @@ import warnings
 import pickle
 import torch
 
+local = True
 device = torch.device('cuda:0')
 warnings.filterwarnings('error', category=ConvergenceWarning)
 
@@ -175,15 +176,27 @@ def pipe(data, output='prob'):
     x = panda[IV].drop('HasInquiryTelecomm', axis=1)
     x['missing'] = x.isnull().sum(axis=1)
     
-    imputer = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1L4gfNu_nTiXYMUHBn-7bGu_VBCgUF63t'))
+    if local:
+        imputer = pickle.load(open(r'C:\Users\Samuel\Google Drive\Portfolio\Jobs\DriveTime\Pickles\imputer.pkl', 'rb'))
+    else:
+        imputer = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1L4gfNu_nTiXYMUHBn-7bGu_VBCgUF63t'))
+    
     x = pd.DataFrame(imputer.transform(x), columns=x.columns)
     
-    scaler = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1q29dWx-YLNQwmv2jFO1Db5amEgthtvQK'))
+    if local:
+        scaler = pickle.load(open(r'C:\Users\Samuel\Google Drive\Portfolio\Jobs\DriveTime\Pickles\scaler.pkl', 'rb'))
+    else:
+        scaler = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1q29dWx-YLNQwmv2jFO1Db5amEgthtvQK'))
+        
     x = pd.DataFrame(scaler.transform(x), columns=x.columns)
     
     x['HasInquiryTelecomm'] = np.where(panda['HasInquiryTelecomm'].isnull(), 0, panda['HasInquiryTelecomm'])
     
-    km = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1VPrzk_u9_vzTqDUMHLgqdoN__GhT1QFH'))
+    if local:
+        km = pickle.load(open(r'C:\Users\Samuel\Google Drive\Portfolio\Jobs\DriveTime\Pickles\KMeans.pkl', 'rb'))
+    else:
+        km = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1VPrzk_u9_vzTqDUMHLgqdoN__GhT1QFH'))
+        
     km = np.argmax(km.transform(x), axis=1)
     km = pd.get_dummies(km, prefix='km')
     
@@ -198,7 +211,10 @@ def pipe(data, output='prob'):
     if output=='x':
         return x
     
-    discriminator = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1O2Rlm7cSu4LZXtqe5Pj-OIX8j8qbvF-t'))
+    if local:
+        discriminator = pickle.load(open(r'C:\Users\Samuel\Google Drive\Portfolio\Jobs\DriveTime\Pickles\discriminator.pkl', 'rb'))
+    else:
+        discriminator = pickle.load(urlopen('https://drive.google.com/uc?export=download&id=1O2Rlm7cSu4LZXtqe5Pj-OIX8j8qbvF-t'))
     
     if output=='prob':
         return discriminator.predict_proba(x)[:, 1]
