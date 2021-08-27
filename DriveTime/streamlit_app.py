@@ -1,8 +1,5 @@
-from googleapiclient.http import MediaIoBaseDownload
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 from matplotlib import pyplot as plt
+from urllib.request import urlopen
 from scipy.stats import rankdata
 import statsmodels.api as sm
 import streamlit as st
@@ -13,44 +10,9 @@ import sklearn
 import lxml
 import pickle
 import re
-import io
-
-scope = ['https://www.googleapis.com/auth/drive.metadata.readonly',
-         'https://www.googleapis.com/auth/drive.readonly']
-
-creds = {'token': 'ya29.a0ARrdaM_HEuu1ji1vFYJlfoTu0DWg1bgazOvH-tPsTwGoT3uAY2Y2VG5sBOjB7ARcuYx7_ZOCJ0VbZmXpXLLb-rmlLxcUkj85SfsUdHml7mPPV78hWOxfXydUCkYPh1G1y8phIuXn2-K_dMLnBxG7NmQ3Szcn',
-         'refresh_token': '1//04_nsZnCzlbAzCgYIARAAGAQSNwF-L9IrRTNlhEFSrdZRyxiC8Nv0nfYqIVi4ke4j2LN5NTqEnkBYHW6eKIfCC4nhWGyOP4WyfGs',
-         'token_uri': 'https://oauth2.googleapis.com/token',
-         'client_id': '50461049779-kshbp7gqemt3cbjl744bc4l7spgnnf2n.apps.googleusercontent.com',
-         'client_secret': 'BjdAEk3DDQOe2VAnjXeIlqci',
-         'scopes': ['https://www.googleapis.com/auth/drive.metadata.readonly',
-                    'https://www.googleapis.com/auth/drive.readonly'],
-         'expiry': '2021-08-26T02:37:51.294722Z'}
-
-if 'creds' not in st.session_state:
-    creds = Credentials.from_authorized_user_info(creds, scope)
-    
-    if not creds.valid and creds.refresh_token:
-            creds.refresh(Request())
-            
-    st.session_state['creds'] = creds
-
-def google_drive(file_id, creds, file_type='pickle'):
-    service = build('drive', 'v3', credentials=creds, cache_discovery=False)
-    req = service.files().get_media(fileId=file_id)
-    file = io.BytesIO()
-    downloader = MediaIoBaseDownload(file, req)
-    done = False
-    while done is False: 
-        _,done = downloader.next_chunk()
-    file.seek(0)
-    
-    if file_type == 'panda':
-        return pd.read_csv(file)
-    elif file_type == 'pickle':
-        return pickle.load(file)
 
 if 'discriminator_sm' not in st.session_state:
+    api = 'AIzaSyAftHJhz8-5UUOACb46YBLchKL78yrXpbw'
     panda = '1iWpQsRaB0CFht_xkhmZqIrYZ9ChRUHno'
     imputer = '1L4gfNu_nTiXYMUHBn-7bGu_VBCgUF63t'
     scaler = '1q29dWx-YLNQwmv2jFO1Db5amEgthtvQK'
@@ -58,12 +20,12 @@ if 'discriminator_sm' not in st.session_state:
     discriminator = '1O2Rlm7cSu4LZXtqe5Pj-OIX8j8qbvF-t'
     discriminator_sm = '164_xw73fhJFxCQbj6prg3slysxGvxKhP'
     
-    st.session_state['panda'] = google_drive(panda, st.session_state['creds'], 'panda')
-    st.session_state['imputer'] = google_drive(imputer, st.session_state['creds'])
-    st.session_state['scaler'] = google_drive(scaler, st.session_state['creds'])
-    st.session_state['KMeans'] = google_drive(KMeans, st.session_state['creds'])
-    st.session_state['discriminator'] = google_drive(discriminator, st.session_state['creds'])
-    st.session_state['discriminator_sm'] = google_drive(discriminator_sm, st.session_state['creds'])
+    st.session_state['panda'] = pd.read_csv(f'https://www.googleapis.com/drive/v3/files/{panda}?key={api}&alt=media')
+    st.session_state['imputer'] = pickle.load(urlopen(f'https://www.googleapis.com/drive/v3/files/{imputer}?key={api}&alt=media'))
+    st.session_state['scaler'] = pickle.load(urlopen(f'https://www.googleapis.com/drive/v3/files/{scaler}?key={api}&alt=media'))
+    st.session_state['KMeans'] = pickle.load(urlopen(f'https://www.googleapis.com/drive/v3/files/{KMeans}?key={api}&alt=media'))
+    st.session_state['discriminator'] = pickle.load(urlopen(f'https://www.googleapis.com/drive/v3/files/{discriminator}?key={api}&alt=media'))
+    st.session_state['discriminator_sm'] = pickle.load(urlopen(f'https://www.googleapis.com/drive/v3/files/{discriminator_sm}?key={api}&alt=media'))
 
 
 ############
