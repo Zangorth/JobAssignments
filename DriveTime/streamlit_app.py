@@ -85,9 +85,32 @@ def pipe(data, imputer, scaler, km, discriminator=None, output='prob'):
 def pipeline_example(imputer, scaler, km, discriminator):
     st.title('DriveTime')
     st.header('Pipeline Example')
-    st.write('')
     
     file = st.sidebar.file_uploader('Customer Data File for Prediction', type=['.csv'], accept_multiple_files=False)
+    
+    if file == None:
+        left, right = st.columns(2)
+        
+        left.subheader('Assignment')
+        comment = '''
+        Prepare a scoring pipeline to use your predictive  model(s) in a production environment. 
+        To do this you will need to accomplish the following: \n
+            * Ingest new loans for scoring \n
+            * Perform any required data preprocessing steps such as missing data imputation \n
+            * Score the loans using your models \n
+            * Output the scores so your business partners can match the scores to the new loans \n
+        '''
+        
+        left.markdown(comment)
+        
+        download_path = st.sidebar.text_input('Download Path:')
+        sample_file = st.sidebar.button('Download Sample File for Testing')
+        
+        if sample_file:
+            sample = st.session_state['panda']
+            sample.to_csv(f'{download_path}/sample_file.csv', encoding='utf8', index=False)
+        
+        
     
     if file != None:
         panda = pd.read_csv(file, encoding='utf8')
@@ -113,8 +136,6 @@ def pipeline_example(imputer, scaler, km, discriminator):
 
 def worst_delinquency(panda):
     st.title('DriveTime')
-    st.header('Worst Delinquency')
-    st.write('')
     
     panda.loc[panda['TotalInquiries'].isnull(), 'TotalInquiries'] = np.mean(panda['TotalInquiries'])
     
@@ -165,7 +186,22 @@ def worst_delinquency(panda):
     out = out.append(append, ignore_index=True, sort=False)
     out['WorstDelinquency'] = out['WorstDelinquency'].astype(str)
     
+    left, right = st.columns(2)
+    
+    left.subheader('Assignment')
+    
+    comment = '''
+    Split up the dataset by the WorstDelinquency Variable. Run a regression of First Year delinquency against
+    Total Inquiries. Extract the predictor's coefficient and p-value from each model. Combine the results
+    in a list where the names of the list correspond to the values of Worst Delinquency'
+    '''
+    
+    left.markdown(comment)
+    
+    st.subheader('Worst Delinquency')
     st.dataframe(out)
+    
+    
     
     
 
@@ -315,11 +351,36 @@ def plots(panda, imputer, scaler, km, discriminator):
     
 def model(discriminator):
     st.title('DriveTime')
-    st.header('Model Results - ROC AUC 0.6')
-    st.write('')
+    
+    left, right = st.columns(2)
+    
+    left.subheader('Model Results - ROC AUC 0.6')
     summary = discriminator.summary().tables[1].as_html()
     summary = pd.read_html(summary, header=0, index_col=0)[0]
-    st.dataframe(summary)
+    left.dataframe(summary)
+    
+    right.subheader('Assignment')
+    
+    comments = '''
+    Load the provided data from the accompanying file. Perfrom simple exploratory data analysis, including summary
+    statistics and visualizations of the distributions of the data and relationships (see Plots Tab).
+    Then build one (or more) model(s) using the provided data. The objective of modeling with this data is 
+    to be able to redict the probability that new accounts will become delinquent in the first year 
+    Our primary concern is to differentiate low risk accounts from high risk accounts in a rank order fashion.
+    '''
+    
+    right.markdown(comments)
+    right.write('')
+    
+    comments = '''
+    Make sure to identify the strongest predictor variables and provide interpretations. 
+    Identify and explain any issues or caveats with the data and the models. Calculate predictions
+    and show model performance on out of sample data. Finally, summarize results in a fashion that differentiates
+    higher risk accounts from lower risk accounts. 
+    '''
+    
+    right.markdown(comments)
+    
     
 def summary():
     st.title('DriveTime')
@@ -421,3 +482,4 @@ elif page == 'Worst Delinquency':
 elif page == 'Pipeline':
     pipeline_example(st.session_state['imputer'], st.session_state['scaler'],
                      st.session_state['KMeans'], st.session_state['discriminator'])
+
